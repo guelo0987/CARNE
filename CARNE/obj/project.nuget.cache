@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "dgSpecHash": "4lzC4N2C6Mo=",
+  "success": true,
+  "projectFilePath": "/Users/miguelcruz/Desktop/CARNE/CARNE/CARNE.csproj",
+  "expectedPackageFiles": [
+    "/Users/miguelcruz/.nuget/packages/microsoft.aspnetcore.openapi/9.0.0/microsoft.aspnetcore.openapi.9.0.0.nupkg.sha512",
+    "/Users/miguelcruz/.nuget/packages/microsoft.openapi/1.6.17/microsoft.openapi.1.6.17.nupkg.sha512"
+  ],
+  "logs": []
+}
