@@ -1,11 +1,12 @@
 {
   "version": 2,
-  "dgSpecHash": "eQ1jzs7YvGY=",
+  "dgSpecHash": "8hwuPA5yr60=",
   "success": true,
   "projectFilePath": "/Users/miguelcruz/Desktop/CARNE/CARNE/CARNE.csproj",
   "expectedPackageFiles": [
     "/Users/miguelcruz/.nuget/packages/azure.core/1.38.0/azure.core.1.38.0.nupkg.sha512",
     "/Users/miguelcruz/.nuget/packages/azure.identity/1.11.4/azure.identity.1.11.4.nupkg.sha512",
+    "/Users/miguelcruz/.nuget/packages/bcrypt.net-next/4.0.3/bcrypt.net-next.4.0.3.nupkg.sha512",
     "/Users/miguelcruz/.nuget/packages/humanizer.core/2.14.1/humanizer.core.2.14.1.nupkg.sha512",
     "/Users/miguelcruz/.nuget/packages/microsoft.aspnetcore.authentication.jwtbearer/9.0.0/microsoft.aspnetcore.authentication.jwtbearer.9.0.0.nupkg.sha512",
     "/Users/miguelcruz/.nuget/packages/microsoft.aspnetcore.jsonpatch/9.0.0/microsoft.aspnetcore.jsonpatch.9.0.0.nupkg.sha512",

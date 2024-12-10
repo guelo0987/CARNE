@@ -1,6 +1,5 @@
 using System.Security.Claims;
 using CARNE.Context;
-using CARNE.Context;
 using Microsoft.AspNetCore.Mvc.Controllers;
 
 public class RolePermissionMiddleware
@@ -15,23 +14,19 @@ public class RolePermissionMiddleware
     public async Task InvokeAsync(HttpContext context)
     {
         var path = context.Request.Path.Value;
-        Console.WriteLine($"Ruta completa: {path}");
 
-        // Excluir rutas específicas (por ejemplo, login)
-        if (path != null && path.StartsWith("/api/Auth/login"))
+        // Excluir rutas específicas: Swagger y Login
+        if (path != null && (path.StartsWith("/") || path.StartsWith("/api/Auth/login")))
         {
             await _next(context);
             return;
         }
-        
-        
-        
 
         // Resolver el DbContext
         var db = context.RequestServices.GetRequiredService<MyDbContext>();
         var userRole = context.User.FindFirst(ClaimTypes.Role)?.Value;
-        Console.WriteLine($"Rol del usuario: {userRole}");
 
+        // Si no se encuentra un rol, denegar acceso
         if (userRole == null)
         {
             context.Response.StatusCode = StatusCodes.Status403Forbidden;
@@ -42,15 +37,13 @@ public class RolePermissionMiddleware
         // Permitir acceso completo para Admin
         if (userRole == "Admin")
         {
-            Console.WriteLine("Acceso permitido para el rol 'Admin'.");
             await _next(context);
             return;
         }
 
-        // Obtener el nombre del controlador
+        // Obtener el nombre del controlador desde el endpoint
         var endpoint = context.GetEndpoint();
         var controllerName = endpoint?.Metadata.GetMetadata<ControllerActionDescriptor>()?.ControllerName;
-        Console.WriteLine($"Controller Name: {controllerName}");
 
         if (controllerName == null)
         {
