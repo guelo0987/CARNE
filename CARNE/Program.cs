@@ -1,41 +1,117 @@
+using System.Text;
+using CARNE.Context;
+using Newtonsoft.Json;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Extensions.FileProviders;
+using Swashbuckle.AspNetCore.Filters;
+using System.IO;
+
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
+
+//Logs Configuración
+
+
+//Configuracion de la base de datos 
+builder.Services.AddDbContext<MyDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+
+//Controlador Servicios
+builder.Services.AddControllers(option => option.ReturnHttpNotAcceptable = true)
+    .AddNewtonsoftJson(options => options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore)
+    .AddXmlDataContractSerializerFormatters();
+
+
+
+
+//Configuracion JWT
+builder.Services.AddAuthentication(options =>
+    {
+        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    })
+    .AddJwtBearer(options =>
+    {
+        options.RequireHttpsMetadata = true;  // Asegúrate de que RequireHttpsMetadata esté configurado correctamente
+        options.SaveToken = true;
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+        }; 
+        
+    });
+
+
+//Configuracion de politicas de autorización
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("RequireAdministratorRole", policy => policy.RequireRole("Admin"));
+    options.AddPolicy("RequireEmpleadoRole", policy => policy.RequireRole("Empleado"));
+});
+
+
+
+
+//Configuracion Swagger
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
+
+builder.Services.AddSingleton<IWebHostEnvironment>(builder.Environment);
+
+//Configuración Cors para poder hacerlo con ReactJS
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowReactApp",
+        builder => builder
+            .WithOrigins("http://localhost:5173") // URL de tu app React
+            .AllowAnyMethod()     // Permite todos los métodos HTTP (GET, POST, PUT, DELETE, etc.)
+            .AllowAnyHeader()
+            .AllowCredentials());
+});
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+var imagesPath = Path.Combine(Directory.GetCurrentDirectory(), "Imagenes");
+if (!Directory.Exists(imagesPath))
 {
-    app.MapOpenApi();
+    Directory.CreateDirectory(imagesPath);
 }
 
-app.UseHttpsRedirection();
-
-var summaries = new[]
+app.UseStaticFiles(new StaticFileOptions
 {
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
+});
 
-app.MapGet("/weatherforecast", () =>
-    {
-        var forecast = Enumerable.Range(1, 5).Select(index =>
-                new WeatherForecast
-                (
-                    DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-                    Random.Shared.Next(-20, 55),
-                    summaries[Random.Shared.Next(summaries.Length)]
-                ))
-            .ToArray();
-        return forecast;
-    })
-    .WithName("GetWeatherForecast");
+
+
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+
+app.UseRouting();
+app.UseCors("AllowReactApp");
+app.UseHttpsRedirection();
+//Usamos la autenticación antes de la autorización  
+app.UseAuthentication();
+app.UseMiddleware<RolePermissionMiddleware>();
+app.UseAuthorization();
+
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapControllers();
+});
 
 app.Run();
 
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}
