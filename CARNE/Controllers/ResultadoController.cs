@@ -103,33 +103,76 @@ public class ResultadoController : ControllerBase
         return Ok("Operación completada correctamente.");
     }
 
+    
+    
+    
+    
+    
+    
+    
     // POST: api/Resultado/FinalizarInspeccion
     [HttpPost("FinalizarInspeccion")]
     public IActionResult FinalizarInspeccion(int idInspeccion)
     {
+        var inspeccion = _db.Inspecciones
+            .Include(i => i.IdSolicitudNavigation)
+            .FirstOrDefault(i => i.IdInspeccion == idInspeccion);
+
+        if (inspeccion == null)
+        {
+            return NotFound("Inspección no encontrada.");
+        }
+
         var resultados = _db.ResultadosInspeccions
             .Where(r => r.IdInspeccion == idInspeccion)
             .ToList();
 
         if (!resultados.Any())
         {
-            return NotFound("No hay resultados asociados a esta inspección.");
+            return BadRequest("No hay resultados asociados a esta inspección.");
         }
 
         var cumpleCount = resultados.Count(r => r.Cumple);
         var totalItems = resultados.Count;
 
-        var inspeccion = _db.Inspecciones.Find(idInspeccion);
-        if (inspeccion == null)
-        {
-            return NotFound("Inspección no encontrada.");
-        }
-
+        // Determinar si cumplió o no
         inspeccion.Resultado = cumpleCount > totalItems / 2 ? "Cumple" : "No Cumple";
         _db.SaveChanges();
 
-        return Ok(new { Resultado = inspeccion.Resultado });
+        // Si cumplió, crear un nuevo establecimiento
+        if (inspeccion.Resultado == "Cumple")
+        {
+            var solicitud = inspeccion.IdSolicitudNavigation;
+
+            if (solicitud == null)
+            {
+                return BadRequest("No se encontró la solicitud asociada a esta inspección.");
+            }
+
+            // Crear establecimiento con los datos de la solicitud
+            var nuevoEstablecimiento = new Establecimiento
+            {
+                Direccion = solicitud.Direccion,
+                Nombre = solicitud.NombreEst,
+                Riesgo = "Pendiente", // Atributos iniciales básicos
+                TipoOperacion = solicitud.TipoOperacion,
+                EstadoEstablecimiento = "Activo" // Estado inicial
+            };
+
+            _db.Establecimientos.Add(nuevoEstablecimiento);
+            _db.SaveChanges();
+
+            return Ok(new
+            {
+                Resultado = inspeccion.Resultado,
+                Mensaje = "Inspección finalizada y establecimiento creado correctamente.",
+                Establecimiento = nuevoEstablecimiento
+            });
+        }
+
+        return Ok(new { Resultado = inspeccion.Resultado, Mensaje = "Inspección finalizada. No se creó un establecimiento porque no cumplió." });
     }
+
 
     // DELETE: api/Resultado/{id}
     [HttpDelete("{id}")]
