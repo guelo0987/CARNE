@@ -262,14 +262,6 @@ public partial class MyDbContext : DbContext
             entity.HasKey(e => e.IdInspeccion).HasName("PK__Inspecci__A5F326E1EF116B89");
 
             entity.Property(e => e.IdInspeccion).HasColumnName("idInspeccion");
-            entity.Property(e => e.Coordenadas)
-                .HasMaxLength(100)
-                .IsUnicode(false)
-                .HasColumnName("coordenadas");
-            entity.Property(e => e.Direccion)
-                .HasMaxLength(500)
-                .IsUnicode(false)
-                .HasColumnName("direccion");
             entity.Property(e => e.FechaInspeccion)
                 .HasColumnType("datetime")
                 .HasColumnName("fechaInspeccion");

@@ -340,23 +340,11 @@ namespace CARNE.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdInspeccion"));
 
-                    b.Property<string>("Coordenadas")
-                        .HasMaxLength(100)
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(100)")
-                        .HasColumnName("coordenadas");
-
-                    b.Property<string>("Direccion")
-                        .HasMaxLength(500)
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(500)")
-                        .HasColumnName("direccion");
-
                     b.Property<DateTime?>("FechaInspeccion")
                         .HasColumnType("datetime")
                         .HasColumnName("fechaInspeccion");
 
-                    b.Property<int>("IdAdmin")
+                    b.Property<int?>("IdAdmin")
                         .HasColumnType("int")
                         .HasColumnName("idAdmin");
 
@@ -368,7 +356,7 @@ namespace CARNE.Migrations
                         .HasColumnType("int")
                         .HasColumnName("idEstablecimiento");
 
-                    b.Property<int>("IdSolicitud")
+                    b.Property<int?>("IdSolicitud")
                         .HasColumnType("int")
                         .HasColumnName("idSolicitud");
 
@@ -929,7 +917,6 @@ namespace CARNE.Migrations
                     b.HasOne("CARNE.Models.Admin", "IdAdminNavigation")
                         .WithMany("Inspecciones")
                         .HasForeignKey("IdAdmin")
-                        .IsRequired()
                         .HasConstraintName("FK__Inspeccio__idAdm__29221CFB");
 
                     b.HasOne("CARNE.Models.Admin", null)
