@@ -8,8 +8,7 @@ public partial class ItemsVerificacion
     public int IdItem { get; set; }
 
     public int IdLista { get; set; }
-
-    public int NumeroItem { get; set; }
+    
 
     public string Descripcion { get; set; } = null!;
 

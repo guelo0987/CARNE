@@ -4,6 +4,7 @@ using CARNE.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CARNE.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    partial class MyDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241212033500_UpdateInspeccione")]
+    partial class UpdateInspeccione
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -464,6 +467,10 @@ namespace CARNE.Migrations
                     b.Property<int>("IdLista")
                         .HasColumnType("int")
                         .HasColumnName("idLista");
+
+                    b.Property<int>("NumeroItem")
+                        .HasColumnType("int")
+                        .HasColumnName("numeroItem");
 
                     b.HasKey("IdItem")
                         .HasName("PK__ItemsVer__AD19426894AEE37B");

@@ -355,7 +355,6 @@ public partial class MyDbContext : DbContext
                 .IsUnicode(false)
                 .HasColumnName("descripcion");
             entity.Property(e => e.IdLista).HasColumnName("idLista");
-            entity.Property(e => e.NumeroItem).HasColumnName("numeroItem");
 
             entity.HasOne(d => d.IdListaNavigation).WithMany(p => p.ItemsVerificacions)
                 .HasForeignKey(d => d.IdLista)
