@@ -465,6 +465,9 @@ namespace CARNE.Migrations
                         .HasColumnType("int")
                         .HasColumnName("idLista");
 
+                    b.Property<int>("NumeroItem")
+                        .HasColumnType("int");
+
                     b.HasKey("IdItem")
                         .HasName("PK__ItemsVer__AD19426894AEE37B");
 

@@ -47,6 +47,22 @@ public class ItemsVerificacionController : ControllerBase
         return Ok(item);
     }
 
+    // GET: api/ItemsVerificacion/Lista/{idLista}
+    [HttpGet("Lista/{idLista}")]
+    public IActionResult GetItemsByList(int idLista)
+    {
+        var items = _db.ItemsVerificacions
+            .Include(l => l.IdListaNavigation)
+            .Where(l => l.IdLista == idLista)
+            .ToList();
+
+        if (items == null || !items.Any())
+        {
+            return NotFound("No hay ítems de verificación para la lista especificada.");
+        }
+        return Ok(items);
+    }
+
     // UPSERT: api/ItemsVerificacion
     [HttpPost]
     public IActionResult UpsertItemVerificacion([FromBody] ItemsDTO itemDto)
@@ -65,6 +81,7 @@ public class ItemsVerificacionController : ControllerBase
             var newItem = new ItemsVerificacion
             {
                 IdLista = itemDto.IdLista,
+                NumeroItem = itemDto.NumeroItem,
                 Descripcion = itemDto.Descripcion,
                 CriterioCumplimiento = itemDto.CriterioCumplimiento
             };
@@ -75,6 +92,7 @@ public class ItemsVerificacionController : ControllerBase
         {
             // Update existing record
             existingItem.IdLista = itemDto.IdLista;
+            existingItem.NumeroItem = itemDto.NumeroItem;
             existingItem.Descripcion = itemDto.Descripcion;
             existingItem.CriterioCumplimiento = itemDto.CriterioCumplimiento;
         }

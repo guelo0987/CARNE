@@ -9,7 +9,7 @@ namespace CARNE.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-[Authorize(Policy = "RequireAdministratorRole")]
+[Authorize]
 public class ListaVerificacionController : ControllerBase
 {
     private readonly MyDbContext _db;
@@ -45,6 +45,22 @@ public class ListaVerificacionController : ControllerBase
             return NotFound("Lista de verificación no encontrada.");
         }
         return Ok(lista);
+    }
+    
+    //Obetener Lista Por Normativa
+    [HttpGet("Normativa")]
+    public IActionResult GetListasByNormativa(int idNormativa)
+    {
+        var listas = _db.ListaVerificacions
+            .Include(l => l.IdNormativaNavigation)
+            .Where(l => l.IdNormativa == idNormativa)
+            .ToList();
+
+        if (listas == null || !listas.Any())
+        {
+            return NotFound("No hay listas de verificación para la normativa especificada.");
+        }
+        return Ok(listas);
     }
 
     // UPSERT: api/ListaVerificacion
