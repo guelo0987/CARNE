@@ -26,8 +26,7 @@ public partial class Usuario
     public DateTime? FechaNacimiento { get; set; }
 
     public DateTime? FechaIngreso { get; set; }
-
-    public virtual ICollection<Inspeccione> Inspecciones { get; set; } = new List<Inspeccione>();
+    
 
     public virtual ICollection<Solicitud> Solicituds { get; set; } = new List<Solicitud>();
 }

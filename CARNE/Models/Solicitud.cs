@@ -14,6 +14,14 @@ public partial class Solicitud
     public DateTime? FechaAprobada { get; set; }
 
     public string? EstadoSolicitud { get; set; }
+    
+    public string Direccion { get; set; }
+    
+    public string NombreEst { get; set; }
+    
+    public string Coordenadas { get; set; }
+    
+    public string TipoOperacion { get; set; }
 
     public virtual Usuario IdUsuarioClienteNavigation { get; set; } = null!;
 

@@ -274,9 +274,9 @@ public partial class MyDbContext : DbContext
                 .HasColumnType("datetime")
                 .HasColumnName("fechaInspeccion");
             entity.Property(e => e.IdAdmin).HasColumnName("idAdmin");
+            entity.Property(e => e.IdAdminInspector).HasColumnName("idAdminInspector");
             entity.Property(e => e.IdEstablecimiento).HasColumnName("idEstablecimiento");
             entity.Property(e => e.IdSolicitud).HasColumnName("idSolicitud");
-            entity.Property(e => e.IdUsuarioInspector).HasColumnName("idUsuarioInspector");
             entity.Property(e => e.Prioridad).HasColumnName("prioridad");
             entity.Property(e => e.Resultado)
                 .HasMaxLength(500)
@@ -287,6 +287,12 @@ public partial class MyDbContext : DbContext
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK__Inspeccio__idAdm__29221CFB");
 
+            // Nueva configuración para IdAdminInspector
+            entity.HasOne<Admin>()
+                .WithMany()
+                .HasForeignKey(d => d.IdAdminInspector)
+                .OnDelete(DeleteBehavior.ClientSetNull);
+
             entity.HasOne(d => d.IdEstablecimientoNavigation).WithMany(p => p.Inspecciones)
                 .HasForeignKey(d => d.IdEstablecimiento)
                 .OnDelete(DeleteBehavior.ClientSetNull)
@@ -295,12 +301,8 @@ public partial class MyDbContext : DbContext
             entity.HasOne(d => d.IdSolicitudNavigation).WithMany(p => p.Inspecciones)
                 .HasForeignKey(d => d.IdSolicitud)
                 .OnDelete(DeleteBehavior.ClientSetNull)
+                .IsRequired(false)
                 .HasConstraintName("FK__Inspeccio__idSol__282DF8C2");
-
-            entity.HasOne(d => d.IdUsuarioInspectorNavigation).WithMany(p => p.Inspecciones)
-                .HasForeignKey(d => d.IdUsuarioInspector)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Inspeccio__idUsu__2A164134");
         });
 
         modelBuilder.Entity<Irregularidad>(entity =>

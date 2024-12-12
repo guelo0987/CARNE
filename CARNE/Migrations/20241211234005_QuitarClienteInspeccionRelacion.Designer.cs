@@ -4,6 +4,7 @@ using CARNE.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CARNE.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    partial class MyDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241211234005_QuitarClienteInspeccionRelacion")]
+    partial class QuitarClienteInspeccionRelacion
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -361,10 +364,9 @@ namespace CARNE.Migrations
                         .HasColumnName("idAdmin");
 
                     b.Property<int>("IdAdminInspector")
-                        .HasColumnType("int")
-                        .HasColumnName("idAdminInspector");
+                        .HasColumnType("int");
 
-                    b.Property<int?>("IdEstablecimiento")
+                    b.Property<int>("IdEstablecimiento")
                         .HasColumnType("int")
                         .HasColumnName("idEstablecimiento");
 
@@ -385,8 +387,6 @@ namespace CARNE.Migrations
                         .HasName("PK__Inspecci__A5F326E1EF116B89");
 
                     b.HasIndex("IdAdmin");
-
-                    b.HasIndex("IdAdminInspector");
 
                     b.HasIndex("IdEstablecimiento");
 
@@ -932,19 +932,16 @@ namespace CARNE.Migrations
                         .IsRequired()
                         .HasConstraintName("FK__Inspeccio__idAdm__29221CFB");
 
-                    b.HasOne("CARNE.Models.Admin", null)
-                        .WithMany()
-                        .HasForeignKey("IdAdminInspector")
-                        .IsRequired();
-
                     b.HasOne("CARNE.Models.Establecimiento", "IdEstablecimientoNavigation")
                         .WithMany("Inspecciones")
                         .HasForeignKey("IdEstablecimiento")
+                        .IsRequired()
                         .HasConstraintName("FK__Inspeccio__idEst__2739D489");
 
                     b.HasOne("CARNE.Models.Solicitud", "IdSolicitudNavigation")
                         .WithMany("Inspecciones")
                         .HasForeignKey("IdSolicitud")
+                        .IsRequired()
                         .HasConstraintName("FK__Inspeccio__idSol__282DF8C2");
 
                     b.Navigation("IdAdminNavigation");

@@ -4,6 +4,7 @@ using CARNE.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CARNE.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    partial class MyDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241211035308_AtributosSolicitudeAdd")]
+    partial class AtributosSolicitudeAdd
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -360,17 +363,17 @@ namespace CARNE.Migrations
                         .HasColumnType("int")
                         .HasColumnName("idAdmin");
 
-                    b.Property<int>("IdAdminInspector")
-                        .HasColumnType("int")
-                        .HasColumnName("idAdminInspector");
-
-                    b.Property<int?>("IdEstablecimiento")
+                    b.Property<int>("IdEstablecimiento")
                         .HasColumnType("int")
                         .HasColumnName("idEstablecimiento");
 
                     b.Property<int>("IdSolicitud")
                         .HasColumnType("int")
                         .HasColumnName("idSolicitud");
+
+                    b.Property<int>("IdUsuarioInspector")
+                        .HasColumnType("int")
+                        .HasColumnName("idUsuarioInspector");
 
                     b.Property<int?>("Prioridad")
                         .HasColumnType("int")
@@ -386,11 +389,11 @@ namespace CARNE.Migrations
 
                     b.HasIndex("IdAdmin");
 
-                    b.HasIndex("IdAdminInspector");
-
                     b.HasIndex("IdEstablecimiento");
 
                     b.HasIndex("IdSolicitud");
+
+                    b.HasIndex("IdUsuarioInspector");
 
                     b.ToTable("Inspecciones");
                 });
@@ -932,26 +935,31 @@ namespace CARNE.Migrations
                         .IsRequired()
                         .HasConstraintName("FK__Inspeccio__idAdm__29221CFB");
 
-                    b.HasOne("CARNE.Models.Admin", null)
-                        .WithMany()
-                        .HasForeignKey("IdAdminInspector")
-                        .IsRequired();
-
                     b.HasOne("CARNE.Models.Establecimiento", "IdEstablecimientoNavigation")
                         .WithMany("Inspecciones")
                         .HasForeignKey("IdEstablecimiento")
+                        .IsRequired()
                         .HasConstraintName("FK__Inspeccio__idEst__2739D489");
 
                     b.HasOne("CARNE.Models.Solicitud", "IdSolicitudNavigation")
                         .WithMany("Inspecciones")
                         .HasForeignKey("IdSolicitud")
+                        .IsRequired()
                         .HasConstraintName("FK__Inspeccio__idSol__282DF8C2");
+
+                    b.HasOne("CARNE.Models.Usuario", "IdUsuarioInspectorNavigation")
+                        .WithMany("Inspecciones")
+                        .HasForeignKey("IdUsuarioInspector")
+                        .IsRequired()
+                        .HasConstraintName("FK__Inspeccio__idUsu__2A164134");
 
                     b.Navigation("IdAdminNavigation");
 
                     b.Navigation("IdEstablecimientoNavigation");
 
                     b.Navigation("IdSolicitudNavigation");
+
+                    b.Navigation("IdUsuarioInspectorNavigation");
                 });
 
             modelBuilder.Entity("CARNE.Models.Irregularidad", b =>
@@ -1140,6 +1148,8 @@ namespace CARNE.Migrations
 
             modelBuilder.Entity("CARNE.Models.Usuario", b =>
                 {
+                    b.Navigation("Inspecciones");
+
                     b.Navigation("Solicituds");
                 });
 #pragma warning restore 612, 618

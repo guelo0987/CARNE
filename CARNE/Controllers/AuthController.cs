@@ -44,8 +44,15 @@ public class AuthController:ControllerBase
             return Unauthorized("Credenciales inválidas.");
         }
 
-        // Verificar contraseña
-        if (!PassHasher.VerifyPassword(loginRequest.Password, admin.Password))
+        // Verificar contraseña como debe de estar con haspassword
+        // if (!PassHasher.VerifyPassword(loginRequest.Password, admin.Password))
+        // {
+        //     _logger.LogError("Contraseña incorrecta.");
+        //     return Unauthorized("Credenciales inválidas.");
+        // }
+        
+        //Prueba Admin
+        if (loginRequest.Password!=  admin.Password)
         {
             _logger.LogError("Contraseña incorrecta.");
             return Unauthorized("Credenciales inválidas.");
