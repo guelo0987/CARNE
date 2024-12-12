@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("CARNE")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+437d18d1aae4e9b7880de158ce2f312866aef2cd")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+6c263c943a93edd0bced4a1cbba9a4cc84595631")]
 [assembly: System.Reflection.AssemblyProductAttribute("CARNE")]
 [assembly: System.Reflection.AssemblyTitleAttribute("CARNE")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

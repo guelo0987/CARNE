@@ -61,6 +61,16 @@ public class ResultadoController : ControllerBase
         {
             return BadRequest(ModelState);
         }
+        
+        // Verificar que el ítem pertenece a la lista especificada
+        var itemValido = _db.ItemsVerificacions
+            .Any(i => i.IdItem == resultadoDto.IdItem && i.IdLista == resultadoDto.IdLista);
+
+        if (!itemValido)
+        {
+            return BadRequest("El ítem no pertenece a la lista especificada.");
+        }
+
 
         var existingResultado = _db.ResultadosInspeccions
             .FirstOrDefault(r => r.IdResultado == resultadoDto.IdResultado);
