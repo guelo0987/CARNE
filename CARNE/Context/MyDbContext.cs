@@ -265,7 +265,7 @@ public partial class MyDbContext : DbContext
             entity.Property(e => e.FechaInspeccion)
                 .HasColumnType("datetime")
                 .HasColumnName("fechaInspeccion");
-            entity.Property(e => e.IdAdmin).HasColumnName("idAdmin");
+            entity.Property(e => e.IdAdmin).HasColumnName("idAdmin").IsRequired(false);
             entity.Property(e => e.IdAdminInspector).HasColumnName("idAdminInspector");
             entity.Property(e => e.IdEstablecimiento).HasColumnName("idEstablecimiento");
             entity.Property(e => e.IdSolicitud).HasColumnName("idSolicitud");

@@ -5,12 +5,11 @@ public class InspeccionDTO
     
 
     public int IdInspeccion { get; set; }
-
-    public int? IdEstablecimiento { get; set; }
+    
 
     public int IdSolicitud { get; set; }
 
-    public int IdAdmin { get; set; }
+    public int? IdAdmin { get; set; }
     
     public int IdAdminInspector { get; set; }
     

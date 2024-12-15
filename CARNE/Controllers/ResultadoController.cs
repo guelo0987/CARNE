@@ -54,6 +54,7 @@ public class ResultadoController : ControllerBase
     }
 
     // POST: api/Resultado
+    //Crear un resultado de inspeccion por una solicitud
     [HttpPost]
     public IActionResult UpsertResultado([FromBody] ResultadoDTO resultadoDto)
     {
@@ -104,6 +105,17 @@ public class ResultadoController : ControllerBase
     }
 
     
+
+    
+    
+    
+    
+    
+    
+    
+    
+    //POST Finalizarinspeccion de Establecimiento Aleatorio, comienzo de irregularidades
+    
     
     
     
@@ -111,7 +123,7 @@ public class ResultadoController : ControllerBase
     
     
     // POST: api/Resultado/FinalizarInspeccion
-    [HttpPost("FinalizarInspeccion")]
+    [HttpPost("FinalizarInspeccionSolicitud")]
     public IActionResult FinalizarInspeccion(int idInspeccion)
     {
         var inspeccion = _db.Inspecciones
