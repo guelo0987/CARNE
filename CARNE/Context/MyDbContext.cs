@@ -312,7 +312,7 @@ public partial class MyDbContext : DbContext
                 .HasColumnType("datetime")
                 .HasColumnName("fechaDetectada");
             entity.Property(e => e.IdEstablecimiento).HasColumnName("idEstablecimiento");
-            entity.Property(e => e.IdLote).HasColumnName("idLote");
+            entity.Property(e => e.IdLote).HasColumnName("idLote").IsRequired(false);
             entity.Property(e => e.IdResultadoInspeccion).HasColumnName("idResultadoInspeccion");
             entity.Property(e => e.NivelGravedad)
                 .HasMaxLength(50)

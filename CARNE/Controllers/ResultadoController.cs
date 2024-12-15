@@ -115,7 +115,62 @@ public class ResultadoController : ControllerBase
     
     
     //POST Finalizarinspeccion de Establecimiento Aleatorio, comienzo de irregularidades
-    
+    // POST: api/Resultado/GenerarIrregularidades
+    [HttpPost("GenerarIrregularidades")]
+    public IActionResult GenerarIrregularidades(int idInspeccion)
+    {
+        // Validar la inspección
+        var inspeccion = _db.Inspecciones
+            .Include(i => i.IdEstablecimientoNavigation)
+            .FirstOrDefault(i => i.IdInspeccion == idInspeccion);
+
+        if (inspeccion == null)
+        {
+            return NotFound("Inspección no encontrada.");
+        }
+
+        // Validar resultados que no cumplieron
+        var resultadosNoCumplen = _db.ResultadosInspeccions
+            .Where(r => r.IdInspeccion == idInspeccion && !r.Cumple)
+            .ToList();
+
+        if (!resultadosNoCumplen.Any())
+        {
+            return Ok("No hay resultados de inspección que generen irregularidades.");
+        }
+
+        // Crear irregularidades para los resultados que no cumplen
+        var irregularidadesCreadas = new List<Irregularidad>();
+
+        foreach (var resultado in resultadosNoCumplen)
+        {
+            var nuevaIrregularidad = new Irregularidad
+            {
+                IdEstablecimiento = inspeccion.IdEstablecimiento ?? 0, // Validar que el establecimiento esté relacionado
+                IdResultadoInspeccion = resultado.IdResultado,
+                Tipo = "No Cumplimiento",
+                FechaDetectada = DateTime.Now,
+                NivelGravedad = "Moderado",
+                DescripcionIrregularidad = $"No se cumplió con el ítem {resultado.IdItem}"
+            };
+
+            _db.Irregularidads.Add(nuevaIrregularidad);
+            irregularidadesCreadas.Add(nuevaIrregularidad);
+        }
+
+        _db.SaveChanges();
+
+        // Obtener todas las sanciones disponibles
+        var sancionesDisponibles = _db.Sanciones.ToList();
+
+        return Ok(new
+        {
+            Mensaje = "Irregularidades generadas con éxito. Seleccione las sanciones a aplicar.",
+            Irregularidades = irregularidadesCreadas,
+            SancionesDisponibles = sancionesDisponibles
+        });
+    }
+
     
     
     

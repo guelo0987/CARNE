@@ -9,7 +9,7 @@ public partial class Irregularidad
 
     public int IdEstablecimiento { get; set; }
 
-    public int IdLote { get; set; }
+    public int? IdLote { get; set; }
 
     public int IdResultadoInspeccion { get; set; }
 
