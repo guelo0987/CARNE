@@ -134,9 +134,10 @@ public class UserController : ControllerBase
         return Ok(user);
     }
 
-    // Eliminar un usuario
+ 
+    // Cambiar estado de usuario a "Inactivo" en lugar de eliminarlo
     [HttpDelete("{id}")]
-    public IActionResult DeleteUser(int id)
+    public IActionResult SetUserInactive(int id)
     {
         var user = _db.Admins.FirstOrDefault(u => u.IdAdmin == id);
 
@@ -146,10 +147,12 @@ public class UserController : ControllerBase
             return NotFound("Usuario no encontrado.");
         }
 
-        _db.Admins.Remove(user);
+        // Cambiar el estado a "Inactivo"
+        user.Estado = "Inactivo";
         _db.SaveChanges();
-        _logger.LogInformation($"Usuario con ID {id} eliminado exitosamente.");
+        _logger.LogInformation($"Estado del usuario con ID {id} cambiado a 'Inactivo'.");
 
-        return Ok("Usuario eliminado exitosamente.");
+        return Ok(new { Message = "El usuario ha sido desactivado exitosamente." });
     }
+
 }

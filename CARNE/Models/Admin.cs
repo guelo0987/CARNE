@@ -27,5 +27,6 @@ public partial class Admin
 
     public DateTime? FechaIngreso { get; set; }
 
+    public string Estado { get; set; } = "Activo";
     public virtual ICollection<Inspeccione> Inspecciones { get; set; } = new List<Inspeccione>();
 }

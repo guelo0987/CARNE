@@ -25,7 +25,7 @@ public class IrregularidadController:ControllerBase
     
     // PUT: api/Resultado/EditarIrregularidad
     [HttpPut("EditarIrregularidad")]
-    public IActionResult EditarIrregularidad(int idIrregularidad, int idLote)
+    public IActionResult EditarIrregularidad(int idIrregularidad, int idLote, string? NivelGravedad)
     {
         // Buscar la irregularidad
         var irregularidad = _db.Irregularidads
@@ -55,6 +55,7 @@ public class IrregularidadController:ControllerBase
 
         // Actualizar la irregularidad con el lote
         irregularidad.IdLote = idLote;
+        irregularidad.NivelGravedad = NivelGravedad;
         _db.SaveChanges();
 
         return Ok(new

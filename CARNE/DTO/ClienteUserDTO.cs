@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+namespace CARNE.DTO;
 
-namespace CARNE.Models;
-
-public partial class Usuario
+public class ClienteUserDTO
 {
     public int IdUsuario { get; set; }
 
@@ -29,5 +26,4 @@ public partial class Usuario
 
     public string Estado { get; set; } = "Activo";
 
-    public virtual ICollection<Solicitud> Solicituds { get; set; } = new List<Solicitud>();
 }

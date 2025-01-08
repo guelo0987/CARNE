@@ -23,7 +23,7 @@ public class InspeccionController : ControllerBase
     
     
     
-    // UPSERT: api/Inspeccion
+    // UPSERT: api/Inspeccion   /No se pueden cambiar inspeccion ya finalizadas
     [HttpPost]
     public IActionResult UpsertInspeccion([FromBody] InspeccionDTO inspeccionDto)
     {
@@ -33,7 +33,7 @@ public class InspeccionController : ControllerBase
         }
 
         
-        if (inspeccionDto.IdInspeccion <= 0)
+        if (inspeccionDto.IdInspeccion <= 0 && inspeccionDto.Resultado != "En Revision")
         {
             // Create new record
             var newInspeccion = new Inspeccione
@@ -118,21 +118,54 @@ public class InspeccionController : ControllerBase
     
     
     
-    
-    
-
-    // GET: api/Inspeccion
     [HttpGet]
-    public IActionResult GetInspecciones()
+    public IActionResult GetInspecciones(
+        [FromQuery] DateTime? fecha, 
+        [FromQuery] string? direccion, 
+        [FromQuery] string? resultado, 
+        [FromQuery] int? prioridad, 
+        [FromQuery] int? idAdminInspector)
     {
-        var inspecciones = _db.Inspecciones.ToList();
+        IQueryable<Inspeccione> query = _db.Inspecciones;
 
-        if (inspecciones == null || !inspecciones.Any())
+        if (fecha.HasValue)
         {
-            return NotFound("No hay ninguna inspección registrada.");
+            query = query.Where(i => i.FechaInspeccion.HasValue && 
+                                     EF.Functions.DateDiffDay(i.FechaInspeccion.Value.Date, fecha.Value.Date) == 0);
         }
-        return Ok(inspecciones);
+
+       
+
+        if (!string.IsNullOrEmpty(resultado))
+        {
+            query = query.Where(i => i.Resultado != null && 
+                                     EF.Functions.Like(i.Resultado, resultado));
+        }
+
+        if (prioridad.HasValue)
+        {
+            query = query.Where(i => i.Prioridad == prioridad.Value);
+        }
+
+        if (idAdminInspector.HasValue)
+        {
+            query = query.Where(i => i.IdAdminInspector == idAdminInspector.Value);
+        }
+
+        var inspecciones = query.ToListAsync();
+
+        if (!inspecciones.Result.Any())
+        {
+            return NotFound("No se encontraron inspecciones que cumplan con los filtros proporcionados.");
+        }
+
+        return Ok(inspecciones.Result);
     }
+
+
+    
+
+   
 
     // GET: api/Inspeccion/{id}
     [HttpGet("{id}")]
@@ -151,7 +184,7 @@ public class InspeccionController : ControllerBase
     
     
 
-    // DELETE: api/Inspeccion/{id}
+    // DELETE: api/Inspeccion/{id} //agregar mas filtros 
     [HttpDelete("{id}")]
     public IActionResult DeleteInspeccion(int id)
     {

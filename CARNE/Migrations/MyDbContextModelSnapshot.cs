@@ -68,6 +68,10 @@ namespace CARNE.Migrations
                         .HasColumnType("varchar(255)")
                         .HasColumnName("email");
 
+                    b.Property<string>("Estado")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime?>("FechaIngreso")
                         .HasColumnType("datetime")
                         .HasColumnName("fechaIngreso");
@@ -811,6 +815,10 @@ namespace CARNE.Migrations
                         .IsUnicode(false)
                         .HasColumnType("varchar(255)")
                         .HasColumnName("email");
+
+                    b.Property<string>("Estado")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("FechaIngreso")
                         .HasColumnType("datetime")
