@@ -20,57 +20,73 @@ public class InspeccionController : ControllerBase
     }
     
     
-    
-    
-    
-    // UPSERT: api/Inspeccion   /No se pueden cambiar inspeccion ya finalizadas
     [HttpPost]
-    public IActionResult UpsertInspeccion([FromBody] InspeccionDTO inspeccionDto)
+public IActionResult UpsertInspeccion([FromBody] InspeccionDTO inspeccionDto)
+{
+    if (!ModelState.IsValid)
     {
-        if (!ModelState.IsValid)
+        return BadRequest(ModelState);
+    }
+
+    // Validar si el IdAdminInspector es válido
+    var inspector = _db.Admins.FirstOrDefault(a => a.IdAdmin == inspeccionDto.IdAdminInspector && a.Rol == "Empleado");
+    
+    if (inspector == null)
+    {
+        return BadRequest("El administrador inspector no es válido o no existe.");
+    }
+
+    if (inspeccionDto.IdInspeccion <= 0)
+    {
+        // Crear nuevo registro
+        var newInspeccion = new Inspeccione
         {
-            return BadRequest(ModelState);
+            IdSolicitud = inspeccionDto.IdSolicitud,
+            IdAdmin = inspeccionDto.IdAdmin,
+            IdAdminInspector = inspeccionDto.IdAdminInspector,
+            FechaInspeccion = inspeccionDto.FechaInspeccion,
+            Prioridad = inspeccionDto.Prioridad,
+            Resultado = "En Revision"
+        };
+
+        _db.Inspecciones.Add(newInspeccion);
+    }
+    else
+    {
+        // Buscar inspección existente
+        var existingInspeccion = _db.Inspecciones.FirstOrDefault(u => u.IdInspeccion == inspeccionDto.IdInspeccion);
+
+        if (existingInspeccion == null)
+        {
+            return NotFound("No se encontró la inspección.");
         }
 
-        
-        if (inspeccionDto.IdInspeccion <= 0 && inspeccionDto.Resultado != "En Revision")
+        // Validar que la inspección no esté finalizada
+        if (existingInspeccion.Resultado != "En Revision")
         {
-            // Create new record
-            var newInspeccion = new Inspeccione
-            {
-                IdSolicitud = inspeccionDto.IdSolicitud,
-                IdAdmin = inspeccionDto.IdAdmin,
-                IdAdminInspector = inspeccionDto.IdAdminInspector,
-                FechaInspeccion = inspeccionDto.FechaInspeccion,
-                Prioridad = inspeccionDto.Prioridad,
-                Resultado = "En Revision"
-            };
-
-            _db.Inspecciones.Add(newInspeccion);
-        }
-        else
-        {
-            var existingInspeccion = _db.Inspecciones.FirstOrDefault(u => u.IdInspeccion == inspeccionDto.IdInspeccion);
-
-            if (existingInspeccion == null)
-            {
-                return NotFound("No se encontro la inspeccion");
-            }
-
-            
-            // Update existing record
-            existingInspeccion.IdSolicitud = inspeccionDto.IdSolicitud;
-            existingInspeccion.IdAdmin = inspeccionDto.IdAdmin;
-            existingInspeccion.IdAdminInspector = inspeccionDto.IdAdminInspector;
-            existingInspeccion.FechaInspeccion = inspeccionDto.FechaInspeccion;
-            existingInspeccion.Prioridad = inspeccionDto.Prioridad;
-            existingInspeccion.Resultado = inspeccionDto.Resultado;
+            return BadRequest("No se pueden modificar inspecciones ya finalizadas.");
         }
 
+        // Actualizar el registro existente
+        existingInspeccion.IdSolicitud = inspeccionDto.IdSolicitud;
+        existingInspeccion.IdAdmin = inspeccionDto.IdAdmin;
+        existingInspeccion.IdAdminInspector = inspeccionDto.IdAdminInspector;
+        existingInspeccion.FechaInspeccion = inspeccionDto.FechaInspeccion;
+        existingInspeccion.Prioridad = inspeccionDto.Prioridad;
+        existingInspeccion.Resultado = inspeccionDto.Resultado;
+    }
+
+    try
+    {
         _db.SaveChanges();
         return Ok("Operación completada correctamente.");
     }
-    
+    catch (Exception ex)
+    {
+        return StatusCode(500, $"Error al guardar los cambios: {ex.Message}");
+    }
+}
+
  
     
     [HttpPost("CrearInspeccionAleatorio")]
@@ -184,14 +200,14 @@ public class InspeccionController : ControllerBase
     
     
 
-    // DELETE: api/Inspeccion/{id} //agregar mas filtros 
+    // DELETE: api/Inspeccion/{id} 
     [HttpDelete("{id}")]
     public IActionResult DeleteInspeccion(int id)
     {
         var inspeccion = _db.Inspecciones.Find(id);
-        if (inspeccion == null)
+        if (inspeccion == null || inspeccion.Resultado != "En Revision")
         {
-            return NotFound("Inspección no encontrada.");
+            return NotFound("No se pudo completar la operación");
         }
 
         _db.Inspecciones.Remove(inspeccion);

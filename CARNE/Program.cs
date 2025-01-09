@@ -50,6 +50,18 @@ builder.Services.AddAuthorization(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowReactApp",
+        builder => builder
+            .WithOrigins("http://localhost:5173") // URL de tu app React
+            .AllowAnyMethod()     // Permite todos los métodos HTTP (GET, POST, PUT, DELETE, etc.)
+            .AllowAnyHeader()
+            .AllowCredentials());
+});
+
 var app = builder.Build();
 
 // Habilitar Swagger en desarrollo
@@ -67,6 +79,7 @@ app.MapGet("/", async context =>
 
 // Configuración de middlewares
 app.UseRouting();
+app.UseCors("AllowReactApp");
 app.UseAuthentication();
 app.UseMiddleware<RolePermissionMiddleware>();
 app.UseAuthorization();

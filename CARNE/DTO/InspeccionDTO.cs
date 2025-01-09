@@ -17,9 +17,7 @@ public class InspeccionDTO
 
     public int? Prioridad { get; set; }
 
-    public string? Direccion { get; set; }
 
-    public string? Coordenadas { get; set; }
 
     public string? Resultado { get; set; }
 
