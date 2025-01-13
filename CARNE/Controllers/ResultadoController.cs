@@ -54,7 +54,7 @@ public class ResultadoController : ControllerBase
     }
 
     // POST: api/Resultado
-    //Crear un resultado de inspeccion por una solicitud
+  
     [HttpPost]
     public IActionResult UpsertResultado([FromBody] ResultadoDTO resultadoDto)
     {

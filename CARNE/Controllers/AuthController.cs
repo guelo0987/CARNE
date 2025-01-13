@@ -79,6 +79,10 @@ public class AuthController:ControllerBase
         // Generar y devolver el token
         return GenerateToken(claims, new ()
         {
+            AdminId = admin.IdAdmin,
+            Apellidos = admin.Apellidos,
+            Direccion = admin.Direccion,
+            FechaNacimiento = admin.FechaNacimiento,
             Nombre = admin.Nombre,
             Telefono = admin.Telefono,
             Email = admin.Email,

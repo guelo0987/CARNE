@@ -31,11 +31,32 @@ public class SolicitudController:ControllerBase
     public IActionResult GetSolicitudes()
     {
 
-        var Solicitudes = _db.Solicituds.ToList();
+        var Solicitudes = _db.Solicituds.Include(e=>e.Inspecciones).Include(u=>u.IdUsuarioClienteNavigation).ToList();
 
         return Ok(Solicitudes);
 
     }
+    
+    [HttpGet("{id}")]
+    public IActionResult GetSolicitud(int id)
+    {
+        // Incluimos las relaciones necesarias (ej. IdUsuarioClienteNavigation) y buscamos por Id
+        var solicitud = _db.Solicituds
+            .Include(u => u.IdUsuarioClienteNavigation)
+            .FirstOrDefault(s => s.IdSolicitud == id);
+
+        // Verificamos si existe la solicitud
+        if (solicitud == null)
+        {
+            return NotFound();
+        }
+
+        // Retornamos la solicitud encontrada
+        return Ok(solicitud);
+    }
+
+    
+    
     // PUT: api/Solicitud/{id}
     [HttpPut("{id}")]
     public IActionResult UpdateSolicitud(int id, [FromBody] SolicitudDTO solicitudDto)

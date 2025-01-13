@@ -55,11 +55,14 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowReactApp",
-        builder => builder
-            .WithOrigins("http://localhost:5173") // URL de tu app React
-            .AllowAnyMethod()     // Permite todos los métodos HTTP (GET, POST, PUT, DELETE, etc.)
-            .AllowAnyHeader()
-            .AllowCredentials());
+        builder =>
+        {
+            builder
+                .WithOrigins("http://localhost:3000") // Especifica el origen de tu aplicación React
+                .AllowAnyMethod()
+                .AllowAnyHeader()
+                .AllowCredentials();
+        });
 });
 
 var app = builder.Build();

@@ -36,6 +36,14 @@ public IActionResult UpsertInspeccion([FromBody] InspeccionDTO inspeccionDto)
         return BadRequest("El administrador inspector no es válido o no existe.");
     }
 
+    // Verificar si ya existe una inspección para esta solicitud
+    var inspeccionExistente = _db.Inspecciones.FirstOrDefault(i => i.IdSolicitud == inspeccionDto.IdSolicitud);
+    
+    if (inspeccionExistente != null && inspeccionDto.IdInspeccion <= 0)
+    {
+        return BadRequest("Ya existe una inspección para esta solicitud.");
+    }
+
     if (inspeccionDto.IdInspeccion <= 0)
     {
         // Crear nuevo registro
@@ -86,49 +94,86 @@ public IActionResult UpsertInspeccion([FromBody] InspeccionDTO inspeccionDto)
         return StatusCode(500, $"Error al guardar los cambios: {ex.Message}");
     }
 }
-
  
     
     [HttpPost("CrearInspeccionAleatorio")]
     public IActionResult CrearInspeccionDesdeEstablecimiento()
     {
+        // 1. Obtener la lista de establecimientos
         var establecimientos = _db.Establecimientos.ToList();
         if (!establecimientos.Any())
         {
             return NotFound("No hay establecimientos registrados para generar una inspección.");
         }
-
-        // Seleccionar un establecimiento aleatorio
+    
+        // 2. Obtener la lista de inspectores (o empleados con rol "Inspector")
+        var inspectores = _db.Admins.Where(a => a.Rol == "Empleado").ToList();
+        if (!inspectores.Any())
+        {
+            return NotFound("No hay administradores con el rol de 'Inspector' disponibles.");
+        }
+    
+        // 3. Seleccionar uno aleatorio de cada lista
         var random = new Random();
         var establecimientoSeleccionado = establecimientos[random.Next(establecimientos.Count)];
+        var inspectorSeleccionado = inspectores[random.Next(inspectores.Count)];
 
-        // Seleccionar un administrador con el rol "Empleado"
-        var empleados = _db.Admins.Where(a => a.Rol == "Empleado").ToList();
-        if (!empleados.Any())
-        {
-            return NotFound("No hay administradores con el rol de 'Empleado' disponibles.");
-        }
-
-        var empleadoSeleccionado = empleados[random.Next(empleados.Count)];
-
-        // Crear la inspección
+        // 4. Crear la inspección
         var nuevaInspeccion = new Inspeccione
         {
             IdEstablecimiento = establecimientoSeleccionado.IdEstablecimiento,
-            IdAdminInspector = empleadoSeleccionado.IdAdmin, // Asignar un inspector aleatorio
-            IdAdmin = null, // El administrador general será null
-            FechaInspeccion = DateTime.Now,
-            Prioridad = 1 // Asignar prioridad predeterminada
+            IdAdminInspector = inspectorSeleccionado.IdAdmin, // Asignar inspector aleatorio
+            IdAdmin = null, // O el administrador general que corresponda, si aplica
+            FechaInspeccion = DateTime.Now.AddDays(7),
+            Prioridad = 1,
+            Resultado = "En Revision"// Puedes establecer la prioridad que consideres
+            
         };
 
         _db.Inspecciones.Add(nuevaInspeccion);
         _db.SaveChanges();
 
+        // 5. Retornar el resultado
         return Ok(new
         {
             Mensaje = "Inspección creada exitosamente.",
             Inspeccion = nuevaInspeccion
         });
+    }
+
+    
+    [HttpGet("verificar-inspeccion/{idSolicitud}")]
+    public IActionResult VerificarInspeccion(int idSolicitud)
+    {
+        try
+        {
+            var inspeccionExistente = _db.Inspecciones
+                .FirstOrDefault(i => i.IdSolicitud == idSolicitud);
+
+            if (inspeccionExistente == null)
+            {
+                return Ok(new { 
+                    tieneInspeccion = false 
+                });
+            }
+
+            return Ok(new
+            {
+                tieneInspeccion = true,
+                inspeccion = new
+                {
+                    idInspeccion = inspeccionExistente.IdInspeccion,
+                    idSolicitud = inspeccionExistente.IdSolicitud,
+                    fechaInspeccion = inspeccionExistente.FechaInspeccion,
+                    prioridad = inspeccionExistente.Prioridad,
+                    resultado = inspeccionExistente.Resultado
+                }
+            });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"Error al verificar la inspección: {ex.Message}");
+        }
     }
 
     
@@ -168,7 +213,8 @@ public IActionResult UpsertInspeccion([FromBody] InspeccionDTO inspeccionDto)
             query = query.Where(i => i.IdAdminInspector == idAdminInspector.Value);
         }
 
-        var inspecciones = query.ToListAsync();
+        var inspecciones = query.Include(u=>u.IdEstablecimientoNavigation)
+            .Include(e=>e.IdSolicitudNavigation).ToListAsync();
 
         if (!inspecciones.Result.Any())
         {
@@ -187,7 +233,10 @@ public IActionResult UpsertInspeccion([FromBody] InspeccionDTO inspeccionDto)
     [HttpGet("{id}")]
     public IActionResult GetInspeccionById(int id)
     {
-        var inspeccion = _db.Inspecciones.Find(id);
+        var inspeccion = _db.Inspecciones.Include(u=>u.IdEstablecimientoNavigation).Include(e=>e.IdAdminNavigation)
+            .Include(o=>o.IdSolicitudNavigation).
+            
+            FirstOrDefault(i=>i.IdInspeccion==id);
 
         if (inspeccion == null)
         {

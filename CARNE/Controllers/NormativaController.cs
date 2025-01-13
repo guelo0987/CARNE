@@ -23,7 +23,7 @@ public class NormativaController : ControllerBase
     [HttpGet]
     public IActionResult GetNormativas()
     {
-        var normativas = _db.Normativas.ToList();
+        var normativas = _db.Normativas.Include(u=>u.ListaVerificacions).ToList();
 
         if (normativas == null || !normativas.Any())
         {
