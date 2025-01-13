@@ -20,8 +20,8 @@ public partial class Inspeccione
     public int? Prioridad { get; set; }
     
     public string? Resultado { get; set; }
-    
-    
+
+    public bool? FueEvaluada { get; set; }
     public virtual Admin IdAdminNavigation { get; set; } = null!;
    
     public virtual Establecimiento IdEstablecimientoNavigation { get; set; } = null!;

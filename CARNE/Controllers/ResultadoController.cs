@@ -99,6 +99,13 @@ public class ResultadoController : ControllerBase
             existingResultado.Cumple = resultadoDto.Cumple;
             existingResultado.Observacion = resultadoDto.Observacion;
         }
+        
+        // Actualizar la inspección como evaluada
+        var inspeccion = _db.Inspecciones.FirstOrDefault(i => i.IdInspeccion == resultadoDto.IdInspeccion);
+        if (inspeccion != null)
+        {
+            inspeccion.FueEvaluada = true;
+        }
 
         _db.SaveChanges();
         return Ok("Operación completada correctamente.");
@@ -239,6 +246,50 @@ public class ResultadoController : ControllerBase
 
         return Ok(new { Resultado = inspeccion.Resultado, Mensaje = "Inspección finalizada. No se creó un establecimiento porque no cumplió." });
     }
+    
+    
+ 
+    [HttpPost("FinalizarInspeccionAleatoria")]
+    public IActionResult FinalizarInspeccionAleatoria(int idInspeccion)
+    {
+        // Buscar la inspección
+        var inspeccion = _db.Inspecciones
+            .FirstOrDefault(i => i.IdInspeccion == idInspeccion);
+
+        if (inspeccion == null)
+        {
+            return NotFound("Inspección no encontrada.");
+        }
+
+        // Buscar resultados asociados a la inspección
+        var resultados = _db.ResultadosInspeccions
+            .Where(r => r.IdInspeccion == idInspeccion)
+            .ToList();
+
+        if (!resultados.Any())
+        {
+            return BadRequest("No hay resultados asociados a esta inspección.");
+        }
+
+        // Determinar si la inspección cumplió o no
+        var cumpleCount = resultados.Count(r => r.Cumple);
+        var totalItems = resultados.Count;
+        inspeccion.Resultado = cumpleCount > totalItems / 2 ? "Cumple" : "No Cumple";
+
+        // Marcar la inspección como evaluada
+        inspeccion.FueEvaluada = true;
+
+        _db.SaveChanges();
+
+        // Retornar el estado de la inspección
+        return Ok(new
+        {
+            Resultado = inspeccion.Resultado,
+            Mensaje = "Inspección finalizada correctamente.",
+            FueEvaluada = inspeccion.FueEvaluada
+        });
+    }
+
 
 
     // DELETE: api/Resultado/{id}

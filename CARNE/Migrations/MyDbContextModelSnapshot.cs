@@ -348,6 +348,9 @@ namespace CARNE.Migrations
                         .HasColumnType("datetime")
                         .HasColumnName("fechaInspeccion");
 
+                    b.Property<bool?>("FueEvaluada")
+                        .HasColumnType("bit");
+
                     b.Property<int?>("IdAdmin")
                         .HasColumnType("int")
                         .HasColumnName("idAdmin");
