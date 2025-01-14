@@ -27,9 +27,8 @@ public class UserController : ControllerBase
         _db = db;
     }
 
-    // Crear o Editar un usuario
-    [HttpPost]
-   public IActionResult AddOrUpdate([FromBody] AdminDTO adminDto)
+   [HttpPost]
+public IActionResult AddOrUpdate([FromBody] AdminDTO adminDto)
 {
     if (adminDto == null)
     {
@@ -49,7 +48,19 @@ public class UserController : ControllerBase
         return BadRequest("El nombre de usuario es obligatorio.");
     }
 
-    // Verificar si es una actualización (ID presente y válido)
+    // Validación de unicidad
+    if (_db.Admins.Any(u => u.Email == adminDto.Email && u.IdAdmin != adminDto.AdminId))
+    {
+        _logger.LogError($"El correo {adminDto.Email} ya está registrado.");
+        return BadRequest($"El correo {adminDto.Email} ya está registrado.");
+    }
+
+    if (_db.Admins.Any(u => u.Username == adminDto.Username && u.IdAdmin != adminDto.AdminId))
+    {
+        _logger.LogError($"El nombre de usuario {adminDto.Username} ya está en uso.");
+        return BadRequest($"El nombre de usuario {adminDto.Username} ya está en uso.");
+    }
+
     if (adminDto.AdminId > 0)
     {
         var existingUser = _db.Admins.FirstOrDefault(u => u.IdAdmin == adminDto.AdminId);
@@ -67,7 +78,6 @@ public class UserController : ControllerBase
         existingUser.Rol = adminDto.Rol;
         existingUser.Telefono = adminDto.Telefono;
 
-        // Actualizar contraseña si se envía una nueva
         if (!string.IsNullOrEmpty(adminDto.Password))
         {
             existingUser.Password = PassHasher.HashPassword(adminDto.Password);
@@ -79,16 +89,9 @@ public class UserController : ControllerBase
     }
     else
     {
-        // Validaciones para un nuevo registro
-        if (_db.Usuarios.Any(a => a.Email == adminDto.Email))
-        {
-            _logger.LogError("El correo ya está registrado.");
-            return BadRequest("El correo ya está registrado.");
-        }
-
         if (adminDto.Rol != "Admin" && adminDto.Rol != "Empleado")
         {
-            _logger.LogError("El rol debe ser Admin o Empleado.");
+            _logger.LogError("El rol debe ser 'Admin' o 'Empleado'.");
             return BadRequest("El rol debe ser 'Admin' o 'Empleado'.");
         }
 
@@ -97,7 +100,7 @@ public class UserController : ControllerBase
             Username = adminDto.Username,
             Nombre = adminDto.Nombre,
             Email = adminDto.Email,
-            Password = PassHasher.HashPassword(adminDto.Password), // Hasheamos la contraseña
+            Password = PassHasher.HashPassword(adminDto.Password),
             Rol = adminDto.Rol,
             FechaIngreso = DateTime.Now,
             Telefono = adminDto.Telefono
@@ -110,6 +113,7 @@ public class UserController : ControllerBase
         return Ok(new { Message = "Usuario registrado exitosamente.", UserId = newUser.IdAdmin });
     }
 }
+
 
     // Obtener todos los usuarios
     [HttpGet]

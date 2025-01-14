@@ -159,6 +159,49 @@ public class SancioneController : ControllerBase
             SancionIrregularidad = nuevaSancionIrregularidad
         });
     }
+    
+    
+    
+    
+    
+    //CREAR UNA SANCION 
+    // POST: api/Sancione/Crear
+    [HttpPost("Crear")]
+    public IActionResult CrearSancion([FromBody] SancionDTO sancionDto)
+    {
+        if (sancionDto == null)
+        {
+            return BadRequest("El cuerpo de la solicitud no puede estar vacío.");
+        }
+
+        if (string.IsNullOrEmpty(sancionDto.Descripcion))
+        {
+            return BadRequest("La descripción de la sanción es obligatoria.");
+        }
+
+        if (sancionDto.Monto <= 0)
+        {
+            return BadRequest("El monto de la sanción debe ser mayor que cero.");
+        }
+
+        // Crear una nueva sanción
+        var nuevaSancion = new Sancione
+        {
+            Descripcion = sancionDto.Descripcion,
+            Monto = sancionDto.Monto
+        };
+
+        // Agregar la sanción a la base de datos
+        _db.Sanciones.Add(nuevaSancion);
+        _db.SaveChanges();
+
+        return Ok(new
+        {
+            Mensaje = "Sanción creada exitosamente.",
+            SancionCreada = nuevaSancion
+        });
+    }
+
 
 
 
