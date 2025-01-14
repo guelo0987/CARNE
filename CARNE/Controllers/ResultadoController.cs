@@ -42,7 +42,7 @@ public class ResultadoController : ControllerBase
     {
         var resultado = _db.ResultadosInspeccions
             .Include(r => r.IdInspeccionNavigation)
-            .Include(r => r.IdListaNavigation)
+            .Include(r => r.IdListaNavigation).ThenInclude(l=>l.IdNormativaNavigation)
             .Include(r => r.IdItemNavigation)
             .FirstOrDefault(r => r.IdResultado == id);
 

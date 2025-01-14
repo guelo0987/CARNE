@@ -23,7 +23,76 @@ public class IrregularidadController:ControllerBase
 
     }
     
-    // PUT: api/Resultado/EditarIrregularidad
+[HttpGet("PorInspeccion/{idInspeccion}")]
+public IActionResult GetIrregularidadesPorInspeccion(int idInspeccion)
+{
+    // Validar si la inspección existe
+    var inspeccion = _db.Inspecciones
+        .Include(i => i.IdAdminNavigation) // Incluir la navegación del administrador
+        .Include(i => i.IdEstablecimientoNavigation) // Incluir el establecimiento relacionado
+        .FirstOrDefault(i => i.IdInspeccion == idInspeccion);
+
+    if (inspeccion == null)
+    {
+        return NotFound("Inspección no encontrada.");
+    }
+
+    // Obtener el nombre del inspector directamente
+    var inspectorNombre = _db.Admins
+        .Where(a => a.IdAdmin == inspeccion.IdAdminInspector)
+        .Select(a => a.Nombre)
+        .FirstOrDefault();
+
+    // Obtener las irregularidades asociadas a la inspección
+    var irregularidades = _db.Irregularidads
+        .Include(i => i.IdResultadoInspeccionNavigation) // Incluir resultados relacionados
+        .Include(i => i.IdLoteNavigation) // Incluir lotes relacionados
+        .Include(i => i.IdEstablecimientoNavigation) // Incluir establecimiento relacionado
+        .Where(i => i.IdResultadoInspeccionNavigation.IdInspeccion == idInspeccion)
+        .Select(i => new
+        {
+            IdIrregularidad = i.IdIrregularidad,
+            Descripcion = i.DescripcionIrregularidad,
+            Tipo = i.Tipo,
+            FechaDetectada = i.FechaDetectada,
+            NivelGravedad = i.NivelGravedad,
+            Establecimiento = i.IdEstablecimientoNavigation != null
+                ? new
+                {
+                    i.IdEstablecimientoNavigation.IdEstablecimiento,
+                    i.IdEstablecimientoNavigation.Nombre,
+                    i.IdEstablecimientoNavigation.Direccion
+                }
+                : null,
+            Lote = i.IdLoteNavigation != null
+                ? new
+                {
+                    i.IdLoteNavigation.IdLote,
+                    i.IdLoteNavigation.CodigoLote,
+                    i.IdLoteNavigation.FechaProduccion,
+                    i.IdLoteNavigation.DescripcionProducto,
+                    i.IdLoteNavigation.DestinoFinal
+                }
+                : null
+        })
+        .ToList();
+
+    // Preparar la respuesta con detalles de la inspección y las irregularidades
+    var respuesta = new
+    {
+        CodigoInspeccion = $"IN-{idInspeccion}",
+        FechaInspeccion = inspeccion.FechaInspeccion?.ToString("dd/MM/yyyy") ?? "Fecha no asignada",
+        Establecimiento = inspeccion.IdEstablecimientoNavigation?.Nombre ?? "No asignado",
+        Inspector = inspectorNombre ?? "No asignado",
+        ListaDeIrregularidades = irregularidades
+    };
+
+    return Ok(respuesta);
+}
+
+
+        
+  
     [HttpPut("EditarIrregularidad")]
     public IActionResult EditarIrregularidad(int idIrregularidad, int idLote, string? NivelGravedad)
     {
@@ -64,6 +133,31 @@ public class IrregularidadController:ControllerBase
             Irregularidad = irregularidad
         });
     }
+    // GET: api/Irregularidad/TieneIrregularidadesInspeccion
+    [HttpGet("TieneIrregularidadesInspeccion")]
+    public IActionResult TieneIrregularidadesInspeccion(int idInspeccion)
+    {
+        // Validar si la inspección existe
+        var inspeccion = _db.Inspecciones.FirstOrDefault(i => i.IdInspeccion == idInspeccion);
+        if (inspeccion == null)
+        {
+            return NotFound("Inspección no encontrada.");
+        }
+
+        // Verificar si hay irregularidades asociadas a la inspección
+        var tieneIrregularidades = _db.Irregularidads
+            .Include(i => i.IdResultadoInspeccionNavigation)
+            .Any(i => i.IdResultadoInspeccionNavigation.IdInspeccion == idInspeccion);
+
+        // Retornar resultado
+        return Ok(new
+        {
+            IdInspeccion = idInspeccion,
+            TieneIrregularidades = tieneIrregularidades
+        });
+    }
+
     
     
-}
+    
+    }

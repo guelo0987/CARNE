@@ -18,6 +18,52 @@ public class LoteProductoController : ControllerBase
     {
         _db = db;
     }
+    
+    
+    [HttpGet("LotesPorEstablecimiento/{idEstablecimiento}")]
+    public IActionResult GetLotesPorEstablecimiento(int idEstablecimiento)
+    {
+        // Validar si el establecimiento existe
+        var establecimiento = _db.Establecimientos
+            .Include(e => e.LotesProductos) // Incluir los lotes relacionados
+            .FirstOrDefault(e => e.IdEstablecimiento == idEstablecimiento);
+
+        if (establecimiento == null)
+        {
+            return NotFound("Establecimiento no encontrado.");
+        }
+
+        // Obtener los lotes relacionados con el establecimiento
+        var lotes = establecimiento.LotesProductos
+            .Select(l => new
+            {
+                l.IdLote,
+                l.CodigoLote,
+                l.FechaProduccion,
+                l.DescripcionProducto,
+                l.DestinoFinal
+            })
+            .ToList();
+
+        if (!lotes.Any())
+        {
+            return NotFound("No se encontraron lotes asociados a este establecimiento.");
+        }
+
+        // Preparar respuesta
+        var respuesta = new
+        {
+            Establecimiento = new
+            {
+                establecimiento.IdEstablecimiento,
+                establecimiento.Nombre,
+                establecimiento.Direccion
+            },
+            Lotes = lotes
+        };
+
+        return Ok(respuesta);
+    }
 
     // GET: api/LoteProducto
     [HttpGet]

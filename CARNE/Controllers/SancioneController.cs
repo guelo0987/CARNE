@@ -24,7 +24,89 @@ public class SancioneController : ControllerBase
         _db = db;
 
     }
+    
+    
+    
+    
+    
+    // PUT: api/Sancione/CambiarEstado/{idIrregularidad}/{idSancion}
+    [HttpPut("CambiarEstado/{idIrregularidad}/{idSancion}")]
+    public IActionResult CambiarEstadoSancion(int idIrregularidad, int idSancion, [FromBody] string nuevoEstado)
+    {
+        // Validar si la relación entre la irregularidad y la sanción existe
+        var sancionIrregularidad = _db.SancionIrregularidads
+            .FirstOrDefault(si => si.IdIrregularidad == idIrregularidad && si.IdSancion == idSancion);
 
+        if (sancionIrregularidad == null)
+        {
+            return NotFound("No se encontró la relación entre la irregularidad y la sanción.");
+        }
+
+        // Cambiar el estado de la sanción
+        sancionIrregularidad.EstadoSancion = nuevoEstado;
+
+        // Registrar la fecha de resolución si el estado es "Resuelto"
+        if (nuevoEstado.Equals("Resuelto", StringComparison.OrdinalIgnoreCase))
+        {
+            sancionIrregularidad.FechaResolution = DateTime.Now;
+        }
+        else
+        {
+            sancionIrregularidad.FechaResolution = null; // Limpiar la fecha si el estado no es "Resuelto"
+        }
+
+        // Guardar los cambios en la base de datos
+        _db.SaveChanges();
+
+        return Ok(new
+        {
+            Mensaje = "Estado de la sanción actualizado exitosamente.",
+            SancionActualizada = new
+            {
+                sancionIrregularidad.IdIrregularidad,
+                sancionIrregularidad.IdSancion,
+                sancionIrregularidad.EstadoSancion,
+                sancionIrregularidad.FechaResolution
+            }
+        });
+    }
+
+    
+    
+    
+
+
+// GET: api/Sancione/{id}
+    [HttpGet("{id}")]
+    public IActionResult GetSancioneById(int id)
+    {
+        // Buscar la sanción por su ID
+        var sancion = _db.Sanciones
+            .Include(s => s.SancionIrregularidads) // Incluir las relaciones con irregularidades, si es necesario
+            .FirstOrDefault(s => s.IdSancion == id);
+
+        if (sancion == null)
+        {
+            return NotFound("Sanción no encontrada.");
+        }
+
+        // Preparar la respuesta
+        var respuesta = new
+        {
+            sancion.IdSancion,
+            sancion.Descripcion,
+            sancion.Monto,
+            IrregularidadesRelacionadas = sancion.SancionIrregularidads.Select(si => new
+            {
+                si.IdIrregularidad,
+                si.FechaAplicada,
+                si.FechaResolution,
+                si.EstadoSancion
+            }).ToList()
+        };
+
+        return Ok(respuesta);
+    }
 
 
 
@@ -32,7 +114,7 @@ public class SancioneController : ControllerBase
     public IActionResult GetSancione()
     {
 
-        return Ok(_db.Sanciones.ToList());
+        return Ok(_db.Sanciones.Include(o=>o.SancionIrregularidads).ToList());
     }
 
 

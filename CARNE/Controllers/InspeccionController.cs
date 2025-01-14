@@ -213,7 +213,7 @@ public IActionResult UpsertInspeccion([FromBody] InspeccionDTO inspeccionDto)
             query = query.Where(i => i.IdAdminInspector == idAdminInspector.Value);
         }
 
-        var inspecciones = query.Include(u=>u.IdEstablecimientoNavigation)
+        var inspecciones = query.Include(u=>u.IdEstablecimientoNavigation).Include(o=>o.ResultadosInspeccions)
             .Include(e=>e.IdSolicitudNavigation).ToListAsync();
 
         if (!inspecciones.Result.Any())
@@ -233,7 +233,9 @@ public IActionResult UpsertInspeccion([FromBody] InspeccionDTO inspeccionDto)
     [HttpGet("{id}")]
     public IActionResult GetInspeccionById(int id)
     {
-        var inspeccion = _db.Inspecciones.Include(u=>u.IdEstablecimientoNavigation).Include(e=>e.IdAdminNavigation)
+        var inspeccion = _db.Inspecciones.Include(u=>u.IdEstablecimientoNavigation).ThenInclude(l=>l.LotesProductos)
+            .Include(e=>e.IdAdminNavigation)
+            .Include(p=>p.ResultadosInspeccions)
             .Include(o=>o.IdSolicitudNavigation).
             
             FirstOrDefault(i=>i.IdInspeccion==id);
