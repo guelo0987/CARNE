@@ -779,6 +779,10 @@ namespace CARNE.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("RNC")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("TipoOperacion")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
